@@ -1,0 +1,46 @@
+body {
+    background: linear-gradient(135deg, #74e6ff, #9c95ff);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container{
+    background-color: rgb(255, 255, 255);
+}
+
+.login-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.btn-custom {
+    background-color: #6c5ce7;
+    color: white;
+    border-radius: 8px;
+}
+
+.btn-custom:hover {
+    background-color: #5b4cc4;
+    color: white;
+}
+
+.registro{
+    color: white;
+}
+
+.volver{
+    color: white;
+}
+
+a.registro:hover{
+    background-color: #0053cf;
+    transition: background-color 0.3s ease;
+}
+
+a.volver:hover{
+    background-color: #00a1e0;
+    transition: background-color 0.3s ease;
+}

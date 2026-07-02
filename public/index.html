@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Inventario</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        h2 {
+            margin: 20px 0 10px;
+            color: #555;
+        }
+        .auth-section, .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        input, select, textarea {
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .product-item {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px dashed #ddd;
+            border-radius: 4px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        .checkbox-label input {
+            width: auto;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gestión de Inventario</h1>
+
+    <!-- Autenticación -->
+    <div class="auth-section" id="authSection">
+        <h2>Iniciar Sesión</h2>
+        <input type="email" id="loginEmail" placeholder="Correo electrónico">
+        <input type="password" id="loginPassword" placeholder="Contraseña">
+        <button onclick="login()">Iniciar Sesión</button>
+    </div>
+
+    <div id="appSection" style="display: none;">
+        <!-- Crear Producto -->
+        <div class="section">
+            <h2>Crear Producto</h2>
+            <input type="text" id="productName" placeholder="Nombre del Producto">
+            <input type="text" id="productCode" placeholder="Código">
+            <input type="text" id="productBarcode" placeholder="Código de Barras">
+            <input type="number" id="productPrice" placeholder="Precio" step="0.01">
+            <input type="number" id="productPriceCost" placeholder="Precio de Costo (opcional)" step="0.01">
+            <select id="productTypeManagement">
+                <option value="">Selecciona Tipo de Gestión</option>
+            </select>
+            <div class="checkbox-label">
+                <input type="checkbox" id="productIsInventoriable" checked>
+                <label for="productIsInventoriable">Es Inventariable</label>
+            </div>
+            <div class="checkbox-label">
+                <input type="checkbox" id="productIsPriceCost">
+                <label for="productIsPriceCost">Usa Precio de Costo</label>
+            </div>
+            <div class="checkbox-label">
+                <input type="checkbox" id="productIsSale" checked>
+                <label for="productIsSale">Es Venta</label>
+            </div>
+            <h4>Asignar a Sucursales</h4>
+            <div id="branchCheckboxes"></div>
+            <button onclick="createProduct()">Crear Producto</button>
+            <pre id="createProductResult"></pre>
+        </div>
+
+        <!-- Ingreso de Mercadería -->
+        <div class="section">
+            <h2>Ingreso de Mercadería</h2>
+            <select id="incomingWarehouseId">
+                <option value="">Selecciona Almacén</option>
+            </select>
+            <select id="incomingMovementTypeId">
+                <option value="">Selecciona Tipo de Movimiento</option>
+            </select>
+            <div id="incomingProducts">
+                <h3>Productos</h3>
+                <div class="product-item" id="incomingProductTemplate" style="display: none;">
+                    <select class="productSelect">
+                        <option value="">Selecciona Producto</option>
+                    </select>
+                    <input type="number" class="quantityIn" placeholder="Cantidad" min="1">
+                    <input type="number" class="priceCost" placeholder="Precio de Costo" step="0.01">
+                    <div class="allotmentFields" style="display: none;">
+                        <input type="text" class="allotmentCode" placeholder="Código de Lote">
+                        <input type="date" class="expirationDate">
+                    </div>
+                    <button class="btn-danger" onclick="removeIncomingProduct(this)">Eliminar Producto</button>
+                </div>
+            </div>
+            <button onclick="addIncomingProduct()">Agregar Producto</button>
+            <br><br>
+            <button onclick="submitIncoming()">Registrar Ingreso</button>
+            <pre id="incomingResult"></pre>
+        </div>
+
+        <!-- Salida de Mercadería -->
+        <div class="section">
+            <h2>Salida de Mercadería</h2>
+            <select id="outgoingWarehouseId">
+                <option value="">Selecciona Almacén</option>
+            </select>
+            <select id="outgoingMovementTypeId">
+                <option value="">Selecciona Tipo de Movimiento</option>
+            </select>
+            <div id="outgoingProducts">
+                <h3>Productos</h3>
+                <div class="product-item" id="outgoingProductTemplate" style="display: none;">
+                    <select class="productSelect">
+                        <option value="">Selecciona Producto</option>
+                    </select>
+                    <input type="number" class="quantityOut" placeholder="Cantidad" min="1">
+                    <select class="allotmentId" style="display: none;">
+                        <option value="">Selecciona Lote</option>
+                    </select>
+                    <button class="btn-danger" onclick="removeOutgoingProduct(this)">Eliminar Producto</button>
+                </div>
+            </div>
+            <button onclick="addOutgoingProduct()">Agregar Producto</button>
+            <br><br>
+            <button onclick="submitOutgoing()">Registrar Salida</button>
+            <pre id="outgoingResult"></pre>
+        </div>
+
+        <!-- Lista de Productos -->
+        <div class="section">
+            <h2>Productos</h2>
+            <button onclick="loadProducts()">Cargar Productos</button>
+            <pre id="productsResult"></pre>
+        </div>
+
+        <!-- Lista de Lotes -->
+        <div class="section">
+            <h2>Lotes</h2>
+            <select id="allotmentProductId">
+                <option value="">Todos los productos</option>
+            </select>
+            <select id="allotmentWarehouseId">
+                <option value="">Todos los almacenes</option>
+            </select>
+            <button onclick="loadAndDisplayAllotments()">Cargar Lotes</button>
+            <div id="allotmentsList"></div>
+        </div>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('token');
+        let products = [];
+        let warehouses = [];
+        let branches = [];
+        let typeManagement = [];
+        let movementTypes = [];
+        let allotments = [];
+
+        function setAuthHeaders() {
+            return {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                if (data.token) {
+                    token = data.token;
+                    localStorage.setItem('token', token);
+                    document.getElementById('authSection').style.display = 'none';
+                    document.getElementById('appSection').style.display = 'block';
+                    await loadInitialData();
+                }
+            } catch (e) {
+                console.error('Login error:', e);
+            }
+        }
+
+        async function loadInitialData() {
+            await Promise.all([
+                loadProducts(),
+                loadWarehouses(),
+                loadBranches(),
+                loadTypeManagement(),
+                loadMovementTypes()
+            ]);
+            populateSelects();
+            renderCheckboxes();
+        }
+
+        async function loadWarehouses() {
+            try {
+                const response = await fetch('/api/warehouses', {
+                    headers: setAuthHeaders()
+                });
+                warehouses = await response.json();
+                return warehouses;
+            } catch (e) {
+                console.error('Error loading warehouses:', e);
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                const response = await fetch('/api/products', {
+                    headers: setAuthHeaders()
+                });
+                products = await response.json();
+                document.getElementById('productsResult').textContent = JSON.stringify(products, null, 2);
+                return products;
+            } catch (e) {
+                console.error('Error loading products:', e);
+            }
+        }
+
+        async function loadBranches() {
+            try {
+                const response = await fetch('/api/branches', {
+                    headers: setAuthHeaders()
+                });
+                branches = await response.json();
+                return branches;
+            } catch (e) {
+                console.error('Error loading branches:', e);
+            }
+        }
+
+        async function loadTypeManagement() {
+            try {
+                const response = await fetch('/api/type-management', {
+                    headers: setAuthHeaders()
+                });
+                typeManagement = await response.json();
+                return typeManagement;
+            } catch (e) {
+                console.error('Error loading type management:', e);
+            }
+        }
+
+        async function loadMovementTypes() {
+            movementTypes = [
+                { id: 1, name: 'Ingreso' },
+                { id: 2, name: 'Salida' }
+            ];
+            return movementTypes;
+        }
+
+        async function loadAllotments(productId = null, warehouseId = null) {
+            try {
+                let url = '/api/allotments';
+                const params = [];
+                if (productId) params.push(`product_id=${productId}`);
+                if (warehouseId) params.push(`warehouse_id=${warehouseId}`);
+                if (params.length > 0) {
+                    url += '?' + params.join('&');
+                }
+                const response = await fetch(url, {
+                    headers: setAuthHeaders()
+                });
+                allotments = await response.json();
+                return allotments;
+            } catch (e) {
+                console.error('Error loading allotments:', e);
+                return [];
+            }
+        }
+
+        function renderCheckboxes() {
+            const branchCheckboxes = document.getElementById('branchCheckboxes');
+            
+            branchCheckboxes.innerHTML = '';
+            branches.forEach(branch => {
+                branchCheckboxes.innerHTML += `
+                    <div class="checkbox-label">
+                        <input type="checkbox" id="branch_${branch.id}" value="${branch.id}">
+                        <label for="branch_${branch.id}">${branch.name}</label>
+                    </div>
+                `;
+            });
+        }
+
+        function populateSelects() {
+            const warehouseSelects = ['incomingWarehouseId', 'outgoingWarehouseId', 'allotmentWarehouseId'];
+            const movementTypeSelects = ['incomingMovementTypeId', 'outgoingMovementTypeId'];
+            const typeManagementSelect = document.getElementById('productTypeManagement');
+            const allotmentProductSelect = document.getElementById('allotmentProductId');
+            
+            warehouseSelects.forEach(id => {
+                const select = document.getElementById(id);
+                select.innerHTML = '<option value="">Selecciona Almacén</option>';
+                warehouses.forEach(wh => {
+                    select.innerHTML += `<option value="${wh.id}">${wh.name}</option>`;
+                });
+            });
+
+            movementTypeSelects.forEach(id => {
+                const select = document.getElementById(id);
+                select.innerHTML = '<option value="">Selecciona Tipo de Movimiento</option>';
+                movementTypes.forEach(mt => {
+                    select.innerHTML += `<option value="${mt.id}">${mt.name}</option>`;
+                });
+            });
+
+            typeManagementSelect.innerHTML = '<option value="">Selecciona Tipo de Gestión</option>';
+            typeManagement.forEach(tm => {
+                typeManagementSelect.innerHTML += `<option value="${tm.id}">${tm.name}</option>`;
+            });
+
+            allotmentProductSelect.innerHTML = '<option value="">Todos los productos</option>';
+            products.forEach(p => {
+                allotmentProductSelect.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+            });
+        }
+
+        async function createProduct() {
+            const name = document.getElementById('productName').value;
+            const code = document.getElementById('productCode').value;
+            const barcode = document.getElementById('productBarcode').value;
+            const isSale = document.getElementById('productIsSale').checked;
+            const isPriceCost = document.getElementById('productIsPriceCost').checked;
+            let price = null;
+            let priceCost = null;
+            
+            if (isSale) {
+                price = parseFloat(document.getElementById('productPrice').value) || 0;
+            }
+            
+            if (isPriceCost) {
+                priceCost = parseFloat(document.getElementById('productPriceCost').value) || null;
+            }
+            
+            const typeManagementId = parseInt(document.getElementById('productTypeManagement').value);
+            const isInventoriable = document.getElementById('productIsInventoriable').checked;
+
+            const branchIds = [];
+            branches.forEach(branch => {
+                if (document.getElementById(`branch_${branch.id}`).checked) {
+                    branchIds.push(branch.id);
+                }
+            });
+
+            try {
+                const response = await fetch('/api/products', {
+                    method: 'POST',
+                    headers: setAuthHeaders(),
+                    body: JSON.stringify({
+                        name,
+                        code,
+                        barcode,
+                        price,
+                        price_cost: priceCost,
+                        type_management_id: typeManagementId,
+                        is_inventoriable: isInventoriable,
+                        is_price_cost: isPriceCost,
+                        is_sale: isSale,
+                        branch_ids: branchIds
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    document.getElementById('createProductResult').textContent = 'Error: ' + errorText;
+                    return;
+                }
+                
+                const data = await response.json();
+                document.getElementById('createProductResult').textContent = JSON.stringify(data, null, 2);
+                await loadProducts();
+            } catch (e) {
+                document.getElementById('createProductResult').textContent = 'Error: ' + e.message;
+            }
+        }
+
+        function addIncomingProduct() {
+            const container = document.getElementById('incomingProducts');
+            const template = document.getElementById('incomingProductTemplate');
+            const clone = template.cloneNode(true);
+            clone.style.display = 'block';
+            clone.id = '';
+
+            const productSelect = clone.querySelector('.productSelect');
+            productSelect.innerHTML = '<option value="">Selecciona Producto</option>';
+            products.forEach(p => {
+                productSelect.innerHTML += `<option value="${p.id}" data-type="${p.type_management_id}">${p.name}</option>`;
+            });
+
+            productSelect.addEventListener('change', function() {
+                const typeManagementId = parseInt(this.options[this.selectedIndex].dataset.type);
+                const allotmentFields = clone.querySelector('.allotmentFields');
+                if (typeManagementId === 2) {
+                    allotmentFields.style.display = 'block';
+                } else {
+                    allotmentFields.style.display = 'none';
+                }
+            });
+
+            container.appendChild(clone);
+        }
+
+        function removeIncomingProduct(btn) {
+            btn.closest('.product-item').remove();
+        }
+
+        async function submitIncoming() {
+            const warehouseId = document.getElementById('incomingWarehouseId').value;
+            const movementTypeId = document.getElementById('incomingMovementTypeId').value;
+            const productItems = document.querySelectorAll('#incomingProducts .product-item:not(#incomingProductTemplate)');
+            
+            const productsData = [];
+            productItems.forEach(item => {
+                const productId = item.querySelector('.productSelect').value;
+                const quantityIn = parseInt(item.querySelector('.quantityIn').value);
+                const priceCost = parseFloat(item.querySelector('.priceCost').value);
+                const typeManagementId = parseInt(item.querySelector('.productSelect').options[item.querySelector('.productSelect').selectedIndex].dataset.type);
+                
+                const productData = { product_id: productId, quantity_in: quantityIn };
+                if (priceCost) productData.price_cost = priceCost;
+
+                if (typeManagementId === 2) {
+                    const code = item.querySelector('.allotmentCode').value;
+                    const expirationDate = item.querySelector('.expirationDate').value;
+                    productData.allotment = { code, expiration_date: expirationDate };
+                }
+
+                productsData.push(productData);
+            });
+
+            try {
+                const response = await fetch('/api/movements/incoming', {
+                    method: 'POST',
+                    headers: setAuthHeaders(),
+                    body: JSON.stringify({
+                        warehouse_id: parseInt(warehouseId),
+                        movement_type_id: parseInt(movementTypeId),
+                        products: productsData
+                    })
+                });
+                const data = await response.json();
+                document.getElementById('incomingResult').textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                document.getElementById('incomingResult').textContent = 'Error: ' + e.message;
+            }
+        }
+
+        function addOutgoingProduct() {
+            const container = document.getElementById('outgoingProducts');
+            const template = document.getElementById('outgoingProductTemplate');
+            const clone = template.cloneNode(true);
+            clone.style.display = 'block';
+            clone.id = '';
+
+            const productSelect = clone.querySelector('.productSelect');
+            const allotmentSelect = clone.querySelector('.allotmentId');
+            productSelect.innerHTML = '<option value="">Selecciona Producto</option>';
+            products.forEach(p => {
+                productSelect.innerHTML += `<option value="${p.id}" data-type="${p.type_management_id}">${p.name}</option>`;
+            });
+
+            productSelect.addEventListener('change', async function() {
+                const typeManagementId = parseInt(this.options[this.selectedIndex].dataset.type);
+                const productId = this.value;
+                const warehouseId = document.getElementById('outgoingWarehouseId').value;
+                
+                if (typeManagementId === 2) {
+                    allotmentSelect.style.display = 'block';
+                    if (productId && warehouseId) {
+                        const productAllotments = await loadAllotments(productId, warehouseId);
+                        allotmentSelect.innerHTML = '<option value="">Selecciona Lote</option>';
+                        productAllotments.forEach(allotment => {
+                            if (allotment.allotment_details && allotment.allotment_details.length > 0) {
+                                const detail = allotment.allotment_details.find(d => d.product_id == productId);
+                                if (detail) {
+                                    const available = detail.quantity - detail.quantity_dispatch;
+                                    if (available > 0) {
+                                        allotmentSelect.innerHTML += `<option value="${allotment.id}">${allotment.code} (Disp: ${available})</option>`;
+                                    }
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    allotmentSelect.style.display = 'none';
+                }
+            });
+
+            container.appendChild(clone);
+        }
+
+        function removeOutgoingProduct(btn) {
+            btn.closest('.product-item').remove();
+        }
+
+        async function submitOutgoing() {
+            const warehouseId = document.getElementById('outgoingWarehouseId').value;
+            const movementTypeId = document.getElementById('outgoingMovementTypeId').value;
+            const productItems = document.querySelectorAll('#outgoingProducts .product-item:not(#outgoingProductTemplate)');
+            
+            const productsData = [];
+            productItems.forEach(item => {
+                const productId = item.querySelector('.productSelect').value;
+                const quantityOut = parseInt(item.querySelector('.quantityOut').value);
+                const typeManagementId = parseInt(item.querySelector('.productSelect').options[item.querySelector('.productSelect').selectedIndex].dataset.type);
+                
+                const productData = { product_id: productId, quantity_out: quantityOut };
+
+                if (typeManagementId === 2) {
+                    const allotmentId = item.querySelector('.allotmentId').value;
+                    productData.allotment_id = parseInt(allotmentId);
+                }
+
+                productsData.push(productData);
+            });
+
+            try {
+                const response = await fetch('/api/movements/outgoing', {
+                    method: 'POST',
+                    headers: setAuthHeaders(),
+                    body: JSON.stringify({
+                        warehouse_id: parseInt(warehouseId),
+                        movement_type_id: parseInt(movementTypeId),
+                        products: productsData
+                    })
+                });
+                const data = await response.json();
+                document.getElementById('outgoingResult').textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                document.getElementById('outgoingResult').textContent = 'Error: ' + e.message;
+            }
+        }
+
+        function setupProductFormListeners() {
+            const isSaleCheckbox = document.getElementById('productIsSale');
+            const priceInput = document.getElementById('productPrice');
+            const isPriceCostCheckbox = document.getElementById('productIsPriceCost');
+            const priceCostInput = document.getElementById('productPriceCost');
+
+            isSaleCheckbox.addEventListener('change', function() {
+                priceInput.disabled = !this.checked;
+                if (!this.checked) {
+                    priceInput.value = '';
+                }
+            });
+
+            isPriceCostCheckbox.addEventListener('change', function() {
+                priceCostInput.disabled = !this.checked;
+                if (!this.checked) {
+                    priceCostInput.value = '';
+                }
+            });
+        }
+
+        async function loadAndDisplayAllotments() {
+            const productId = document.getElementById('allotmentProductId').value;
+            const warehouseId = document.getElementById('allotmentWarehouseId').value;
+            const allotmentsList = document.getElementById('allotmentsList');
+
+            const allotments = await loadAllotments(productId ? productId : null, warehouseId ? warehouseId : null);
+
+            allotmentsList.innerHTML = '';
+            if (allotments.length === 0) {
+                allotmentsList.innerHTML = '<p>No hay lotes disponibles</p>';
+                return;
+            }
+
+            allotments.forEach(allotment => {
+                const today = new Date();
+                const expirationDate = new Date(allotment.expiration_date);
+                const dayExpires = Math.ceil((expirationDate - today) / (1000 * 60 * 60 * 24));
+                
+                let allotmentHtml = `
+                    <div class="product-item">
+                        <h4>Lote: ${allotment.code}</h4>
+                        <p>Almacén: ${allotment.warehouse ? allotment.warehouse.name : 'N/A'}</p>
+                        <p>Fecha de Vencimiento: ${allotment.expiration_date}</p>
+                        <p>Días Restantes: ${dayExpires}</p>
+                        <p>Flag Cerrado: ${allotment.flag_closed ? 'Sí' : 'No'}</p>
+                        <h5>Detalles:</h5>
+                        <ul>
+                `;
+
+                if (allotment.allotment_details && allotment.allotment_details.length > 0) {
+                    allotment.allotment_details.forEach(detail => {
+                        const available = detail.quantity - detail.quantity_dispatch;
+                        allotmentHtml += `
+                            <li>
+                                Producto: ${detail.product ? detail.product.name : 'N/A'}, 
+                                Cantidad Total: ${detail.quantity}, 
+                                Despachado: ${detail.quantity_dispatch}, 
+                                Disponible: ${available}
+                            </li>
+                        `;
+                    });
+                }
+
+                allotmentHtml += `
+                        </ul>
+                    </div>
+                `;
+                allotmentsList.innerHTML += allotmentHtml;
+            });
+        }
+
+        if (token) {
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('appSection').style.display = 'block';
+            loadInitialData();
+            setupProductFormListeners();
+        }
+    </script>
+</body>
+</html>
