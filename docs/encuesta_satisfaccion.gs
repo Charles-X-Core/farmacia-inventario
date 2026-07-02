@@ -24,9 +24,9 @@ function crearEncuesta() {
   // ============================================================
   // DATOS GENERALES
   // ============================================================
-  form.addSectionHeaderItem()
-    .setTitle('Datos Generales')
-    .setDescription('Informacion basica del encuestado.');
+  var seccion = form.addSectionHeaderItem();
+  seccion.setTitle('Datos Generales');
+  seccion.setDescription('Informacion basica del encuestado.');
 
   form.addMultipleChoiceItem()
     .setTitle('1. ¿Cual es tu rol en la farmacia?')
@@ -63,9 +63,9 @@ function crearEncuesta() {
   // ============================================================
   // MODULO DE PRODUCTOS
   // ============================================================
-  form.addSectionHeaderItem()
-    .setTitle('Modulo de Productos')
-    .setDescription('Evalua la funcionalidad del modulo de registro y gestion de productos.');
+  var seccion = form.addSectionHeaderItem();
+  seccion.setTitle('Modulo de Productos');
+  seccion.setDescription('Evalua la funcionalidad del modulo de registro y gestion de productos.');
 
   form.addScaleItem()
     .setTitle('4. ¿Que tan facil es agregar un nuevo producto al sistema?')
@@ -92,9 +92,9 @@ function crearEncuesta() {
   // ============================================================
   // MODULO DE LOTES
   // ============================================================
-  form.addSectionHeaderItem()
-    .setTitle('Modulo de Lotes')
-    .setDescription('Evalua el control de lotes y fechas de vencimiento.');
+  var seccion = form.addSectionHeaderItem();
+  seccion.setTitle('Modulo de Lotes');
+  seccion.setDescription('Evalua el control de lotes y fechas de vencimiento.');
 
   form.addScaleItem()
     .setTitle('8. ¿Que tan intuitivo es el control de lotes?')
@@ -125,9 +125,9 @@ function crearEncuesta() {
   // ============================================================
   // MODULO DE MOVIMIENTOS
   // ============================================================
-  form.addSectionHeaderItem()
-    .setTitle('Modulo de Movimientos')
-    .setDescription('Evalua el registro de entradas y salidas de mercaderia.');
+  var seccion = form.addSectionHeaderItem();
+  seccion.setTitle('Modulo de Movimientos');
+  seccion.setDescription('Evalua el registro de entradas y salidas de mercaderia.');
 
   form.addScaleItem()
     .setTitle('12. ¿Que tan facil es registrar una entrada de mercaderia?')
@@ -154,9 +154,9 @@ function crearEncuesta() {
   // ============================================================
   // MODULO DE VENTAS
   // ============================================================
-  form.addSectionHeaderItem()
-    .setTitle('Modulo de Ventas')
-    .setDescription('Evalua el proceso de venta y emision de comprobantes.');
+  var seccion = form.addSectionHeaderItem();
+  seccion.setTitle('Modulo de Ventas');
+  seccion.setDescription('Evalua el proceso de venta y emision de comprobantes.');
 
   form.addScaleItem()
     .setTitle('16. ¿Que tan rapido es procesar una venta?')
@@ -199,9 +199,9 @@ function crearEncuesta() {
   // ============================================================
   // MODULO DE CLIENTES
   // ============================================================
-  form.addSectionHeaderItem()
-    .setTitle('Modulo de Clientes')
-    .setDescription('Evalua la gestion de clientes.');
+  var seccion = form.addSectionHeaderItem();
+  seccion.setTitle('Modulo de Clientes');
+  seccion.setDescription('Evalua la gestion de clientes.');
 
   form.addScaleItem()
     .setTitle('22. ¿Que tan facil es buscar un cliente existente?')
@@ -222,9 +222,9 @@ function crearEncuesta() {
   // ============================================================
   // KARDEX
   // ============================================================
-  form.addSectionHeaderItem()
-    .setTitle('Kardex')
-    .setDescription('Evalua el reporte de kardex de inventario.');
+  var seccion = form.addSectionHeaderItem();
+  seccion.setTitle('Kardex');
+  seccion.setDescription('Evalua el reporte de kardex de inventario.');
 
   form.addScaleItem()
     .setTitle('25. ¿Que tan clara es la informacion del kardex?')
@@ -245,9 +245,9 @@ function crearEncuesta() {
   // ============================================================
   // INTERFAZ Y DISEÑO
   // ============================================================
-  form.addSectionHeaderItem()
-    .setTitle('Interfaz y Diseno')
-    .setDescription('Evalua la experiencia visual y de navegacion del sistema.');
+  var seccion = form.addSectionHeaderItem();
+  seccion.setTitle('Interfaz y Diseno');
+  seccion.setDescription('Evalua la experiencia visual y de navegacion del sistema.');
 
   form.addScaleItem()
     .setTitle('28. ¿Que tan facil es navegar entre los diferentes modulos?')
@@ -279,9 +279,9 @@ function crearEncuesta() {
   // ============================================================
   // SATISFACCION GENERAL
   // ============================================================
-  form.addSectionHeaderItem()
-    .setTitle('Satisfaccion General')
-    .setDescription('Evalua tu satisfaccion general con el sistema Dielventory.');
+  var seccion = form.addSectionHeaderItem();
+  seccion.setTitle('Satisfaccion General');
+  seccion.setDescription('Evalua tu satisfaccion general con el sistema Dielventory.');
 
   form.addScaleItem()
     .setTitle('32. ¿Que tan satisfecho estas con el sistema Dielventory en general?')
